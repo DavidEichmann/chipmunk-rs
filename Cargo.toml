@@ -1,5 +1,5 @@
 [package]
-name = "chipmunkrs"
+name = "chipmunk-rs"
 version = "0.1.0"
 authors = ["David Eichmann <EichmannD@gmail.com>"]
 

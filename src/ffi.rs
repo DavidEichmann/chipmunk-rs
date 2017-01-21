@@ -1,24 +1,43 @@
 
-use libc::{c_double, c_int, c_uint};
+//! Provides raw ffi bindings to the Chipmunk2D library.
 
-// Bindings to the CHipmunk 7.0.1 library
+use libc::{c_double, c_int, c_uint};
 
 #[repr(C)]
 #[derive(Clone,Copy)]
+/// A Chipmink2D vector.
 pub struct CPVect {
-    pub x: c_double,
-    pub y: c_double,
+    /// The x component.
+    pub x: CPFloat,
+
+    /// The y component.
+    pub y: CPFloat,
 }
 
 impl CPVect {
+    /// Create a new CPVect.
     pub fn new(x: f64, y: f64) -> CPVect { CPVect { x: x, y: y } }
 }
 
+/// A Chipmink2D floating point value.
 pub type CPFloat = c_double;
+
+/// A Chipmink2D Space.
 pub enum CPSpace {}
+
+/// A Chipmink2D Body.
 pub enum CPBody {}
+
+/// A Chipmink2D Shape.
 pub enum CPShape {}
+
+/// A Chipmink2D CircleShape.
 pub enum CPCircleShape {}
+
+/// A Chipmink2D PolyShape.
+pub enum CPPolyShape {}
+
+/// A Chipmink2D Constraint.
 pub enum CPConstraint {}
 
 #[link(name="chipmunk")]
@@ -63,6 +82,7 @@ extern "C" {
     pub fn cpSpaceReindexShape(space: *const CPSpace, shape: *const CPShape);
     pub fn cpSpaceReindexShapesForBody(space: *const CPSpace, body: *const CPBody);
     pub fn cpSpaceReindexStatic(space: *const CPSpace);
+
     // TODO iterators for body/shape/constraint
 
     // Body
@@ -120,4 +140,24 @@ extern "C" {
                             -> *const CPCircleShape;
     pub fn cpCircleShapeGetOffset(circleShape: *const CPCircleShape) -> CPVect;
     pub fn cpCircleShapeGetRadius(circleShape: *const CPCircleShape) -> CPFloat;
+
+    // Segment Shape
+    pub fn cpSegmentShapeFree(shape: *const CPShape);
+    pub fn cpSegmentShapeNew(body: *const CPBody, a: CPVect, b: CPVect, radius: CPFloat) -> *const CPShape;
+    pub fn cpSegmentShapeGetA(shape: *const CPShape) -> CPVect ;
+    pub fn cpSegmentShapeGetB(shape: *const CPShape) -> CPVect ;
+    pub fn cpSegmentShapeGetNormal(shape: *const CPShape) -> CPVect ;
+    pub fn cpSegmentShapeGetRadius(shape: *const CPShape) -> CPFloat ;
+    pub fn cpSegmentShapeSetNeighbors(shape: *const CPShape, prev: CPVect, next: CPVect);
+
+    // TODO
+    // Polygon Shape
+    //pub fn cpPolyShapeNew(body: *const CPBody, numVerts: c_int, verts: *const CPVect , transform: cpTransform, radius: CPFloat) -> *const CPPolyShape;
+    //pub fn cpPolyShapeGetNumVerts(shape: *const CPPolyShape) -> c_int;
+    //pub fn cpPolyShapeGetVert(shape: *const CPPolyShape, index: c_int) -> CPVect;
+    //pub fn cpPolyShapeGetRadius() -> CPFloat;
+    //pub fn cpCentroidForPoly(count: c_int, verts: *const CPVect) -> CPVect;
+
+    // Box Shape
+    pub fn cpBoxShapeNew(body: *const CPBody, width: CPFloat, height: CPFloat, radius: CPFloat) -> *const CPPolyShape;
 }
