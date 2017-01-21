@@ -34,6 +34,9 @@ use ffi::*;
 /// To use a tuple (x, y) as the vector type simple do:
 ///
 /// ```
+/// use chipmunk_rs::{ ChipmunkRsTypes };
+/// use chipmunk_rs::ffi::{ CPVect };
+///
 /// enum TupleTypes {}
 /// impl ChipmunkRsTypes for TupleTypes {
 /// type Vect = (f64, f64);
