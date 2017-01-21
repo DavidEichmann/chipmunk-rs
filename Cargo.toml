@@ -2,6 +2,11 @@
 name = "chipmunk-rs"
 version = "0.1.0"
 authors = ["David Eichmann <EichmannD@gmail.com>"]
+description = "Rust bindings to the Chipmunk2D physics engine."
+repository = "https://github.com/DavidEichmann/chipmunk-rs"
+readme = "README.md"
+keywords = ["physics", "Chipmunk", "Chipmunk2D", "bindings", "2D"]
+license-file = "LICENSE"
 
 [dependencies]
 libc = "0.2.*"
