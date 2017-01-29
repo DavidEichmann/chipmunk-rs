@@ -62,10 +62,10 @@ pub trait ChipmunkRsTypes {
 }
 
 /// Reference counted handle to a `Body<T>`.
-type BodyHandle<T> = Rc<RefCell<Body<T>>>;
+pub type BodyHandle<T> = Rc<RefCell<Body<T>>>;
 
 /// Reference counted handle to a `Shape<T>`.
-type ShapeHandle<T> = Rc<RefCell<Box<Shape<T>>>>;
+pub type ShapeHandle<T> = Rc<RefCell<Box<Shape<T>>>>;
 
 /// A 2D space. See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
 pub struct Space<T: ChipmunkRsTypes> {
@@ -400,7 +400,6 @@ impl<T: ChipmunkRsTypes> Body<T> {
 
 impl<T: ChipmunkRsTypes> Drop for Body<T> {
     fn drop(&mut self) {
-        println!("Free!");
         unsafe { cpBodyFree(self.ptr); }
     }
 }
