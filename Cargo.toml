@@ -12,6 +12,9 @@ license-file = "LICENSE"
 links = "chipmunk"
 build = "build.rs"
 
+[badges]
+travis-ci = { repository = "https://github.com/DavidEichmann/chipmunk-rs", branch = "master" }
+
 [build-dependencies]
 cmake = "0.1.20"
 
