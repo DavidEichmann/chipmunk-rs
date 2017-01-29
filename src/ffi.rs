@@ -40,7 +40,6 @@ pub enum CPPolyShape {}
 /// A Chipmink2D Constraint.
 pub enum CPConstraint {}
 
-#[link(name="chipmunk")]
 extern "C" {
     // Space
     pub fn cpSpaceNew() -> *const CPSpace;
