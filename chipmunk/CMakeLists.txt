@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(SET CMP0001 NEW) # don't use MAKE_BACKWARDS_COMPATIBILITY but policies instead
-cmake_policy(SET CMP0042 NEW) # use MACOSX_RPATH
+# TODO enable this when cmake 3.0 is in the default ubuntu repo # cmake_policy(SET CMP0042 NEW) # use MACOSX_RPATH
 
 project(chipmunk)
 
