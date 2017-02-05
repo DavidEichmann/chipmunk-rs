@@ -16,7 +16,9 @@ pub struct CPVect {
 
 impl CPVect {
     /// Create a new CPVect.
-    pub fn new(x: f64, y: f64) -> CPVect { CPVect { x: x, y: y } }
+    pub fn new(x: f64, y: f64) -> CPVect {
+        CPVect { x: x, y: y }
+    }
 }
 
 /// A Chipmink2D floating point value.
@@ -142,21 +144,33 @@ extern "C" {
 
     // Segment Shape
     pub fn cpSegmentShapeFree(shape: *const CPShape);
-    pub fn cpSegmentShapeNew(body: *const CPBody, a: CPVect, b: CPVect, radius: CPFloat) -> *const CPShape;
-    pub fn cpSegmentShapeGetA(shape: *const CPShape) -> CPVect ;
-    pub fn cpSegmentShapeGetB(shape: *const CPShape) -> CPVect ;
-    pub fn cpSegmentShapeGetNormal(shape: *const CPShape) -> CPVect ;
-    pub fn cpSegmentShapeGetRadius(shape: *const CPShape) -> CPFloat ;
+    pub fn cpSegmentShapeNew(body: *const CPBody,
+                             a: CPVect,
+                             b: CPVect,
+                             radius: CPFloat)
+                             -> *const CPShape;
+    pub fn cpSegmentShapeGetA(shape: *const CPShape) -> CPVect;
+    pub fn cpSegmentShapeGetB(shape: *const CPShape) -> CPVect;
+    pub fn cpSegmentShapeGetNormal(shape: *const CPShape) -> CPVect;
+    pub fn cpSegmentShapeGetRadius(shape: *const CPShape) -> CPFloat;
     pub fn cpSegmentShapeSetNeighbors(shape: *const CPShape, prev: CPVect, next: CPVect);
 
-    // TODO
     // Polygon Shape
-    //pub fn cpPolyShapeNew(body: *const CPBody, numVerts: c_int, verts: *const CPVect , transform: cpTransform, radius: CPFloat) -> *const CPPolyShape;
-    //pub fn cpPolyShapeGetNumVerts(shape: *const CPPolyShape) -> c_int;
-    //pub fn cpPolyShapeGetVert(shape: *const CPPolyShape, index: c_int) -> CPVect;
-    //pub fn cpPolyShapeGetRadius() -> CPFloat;
+    // pub fn cpPolyShapeNew(body: *const CPBody, numVerts: c_int, verts: *const CPVect, transform: cpTransform, radius: CPFloat) -> *const CPPolyShape;
+    pub fn cpPolyShapeNewRaw(body: *const CPBody,
+                             numVerts: c_int,
+                             verts: *const CPVect,
+                             radius: CPFloat)
+                             -> *const CPPolyShape;
+    pub fn cpPolyShapeGetNumVerts(shape: *const CPPolyShape) -> c_int;
+    pub fn cpPolyShapeGetVert(shape: *const CPPolyShape, index: c_int) -> CPVect;
+    pub fn cpPolyShapeGetRadius(shape: *const CPPolyShape) -> CPFloat;
     //pub fn cpCentroidForPoly(count: c_int, verts: *const CPVect) -> CPVect;
 
     // Box Shape
-    pub fn cpBoxShapeNew(body: *const CPBody, width: CPFloat, height: CPFloat, radius: CPFloat) -> *const CPPolyShape;
+    pub fn cpBoxShapeNew(body: *const CPBody,
+                         width: CPFloat,
+                         height: CPFloat,
+                         radius: CPFloat)
+                         -> *const CPPolyShape;
 }

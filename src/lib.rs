@@ -23,7 +23,7 @@ pub mod ffi;
 
 use std::rc::*;
 use std::cell::*;
-use std::marker::{PhantomData};
+use std::marker::PhantomData;
 use std::collections::hash_map::*;
 
 use ffi::*;
@@ -71,7 +71,7 @@ pub type ShapeHandle<T> = Rc<RefCell<Box<Shape<T>>>>;
 pub struct Space<T: ChipmunkRsTypes> {
     ptr: *const CPSpace,
     bodies: HashMap<*const CPBody, BodyHandle<T>>,
-    shapes: HashMap<*const CPShape, ShapeHandle<T>>
+    shapes: HashMap<*const CPShape, ShapeHandle<T>>,
 }
 
 impl<T: ChipmunkRsTypes> Space<T> {
@@ -80,7 +80,7 @@ impl<T: ChipmunkRsTypes> Space<T> {
         Space {
             ptr: unsafe { cpSpaceNew() },
             bodies: HashMap::new(),
-            shapes: HashMap::new()
+            shapes: HashMap::new(),
         }
     }
 
@@ -146,45 +146,52 @@ impl<T: ChipmunkRsTypes> Space<T> {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_iterations(&mut self, value: i32)
-    {
-        unsafe { cpSpaceSetIterations(self.ptr, value); }
+    pub fn set_iterations(&mut self, value: i32) {
+        unsafe {
+            cpSpaceSetIterations(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_damping(&mut self, value: f64)
-    {
-        unsafe { cpSpaceSetDamping(self.ptr, value); }
+    pub fn set_damping(&mut self, value: f64) {
+        unsafe {
+            cpSpaceSetDamping(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_idle_speed_threshold(&mut self, value: f64)
-    {
-        unsafe { cpSpaceSetIdleSpeedThreshold(self.ptr, value); }
+    pub fn set_idle_speed_threshold(&mut self, value: f64) {
+        unsafe {
+            cpSpaceSetIdleSpeedThreshold(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_sleep_time_threshold(&mut self, value: f64)
-    {
-        unsafe { cpSpaceSetSleepTimeThreshold(self.ptr, value); }
+    pub fn set_sleep_time_threshold(&mut self, value: f64) {
+        unsafe {
+            cpSpaceSetSleepTimeThreshold(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_collision_slop(&mut self, value: f64)
-    {
-        unsafe { cpSpaceSetCollisionSlop(self.ptr, value); }
+    pub fn set_collision_slop(&mut self, value: f64) {
+        unsafe {
+            cpSpaceSetCollisionSlop(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_collision_bias(&mut self, value: f64)
-    {
-        unsafe { cpSpaceSetCollisionBias(self.ptr, value); }
+    pub fn set_collision_bias(&mut self, value: f64) {
+        unsafe {
+            cpSpaceSetCollisionBias(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_collision_persistence(&mut self, value: u32)
-    {
-        unsafe { cpSpaceSetCollisionPersistence(self.ptr, value); }
+    pub fn set_collision_persistence(&mut self, value: u32) {
+        unsafe {
+            cpSpaceSetCollisionPersistence(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
@@ -196,12 +203,16 @@ impl<T: ChipmunkRsTypes> Space<T> {
     /// also insert any attached body (this is not done for you).
     pub fn add_shape(&mut self, shape: Box<Shape<T>>) -> ShapeHandle<T> {
         // Add the shape to the space in C.
-        unsafe { cpSpaceAddShape(self.ptr, shape.to_shape()); }
+        unsafe {
+            cpSpaceAddShape(self.ptr, shape.to_shape());
+        }
 
         // Add the shape to the space's managed shapes
         let handle = Rc::new(RefCell::new(shape));
         if let Some(_) = self.shapes.insert(handle.borrow().to_shape(), handle.clone()) {
-            panic!("Trying to insert an already instered shape in to a space. This should not be possible as Shape::new() is the only way to create owned shapes and it always creates new shapes.");
+            panic!("Trying to insert an already instered shape in to a space. This should not be \
+                    possible as Shape::new() is the only way to create owned shapes and it \
+                    always creates new shapes.");
         }
 
         handle
@@ -210,12 +221,16 @@ impl<T: ChipmunkRsTypes> Space<T> {
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
     pub fn add_body(&mut self, body: Body<T>) -> BodyHandle<T> {
         // Add the body to the space in C.
-        unsafe { cpSpaceAddBody(self.ptr, body.ptr); }
+        unsafe {
+            cpSpaceAddBody(self.ptr, body.ptr);
+        }
 
         // Add the body to the space's managed shapes
         let handle = Rc::new(RefCell::new(body));
         if let Some(_) = self.bodies.insert(handle.borrow().ptr, handle.clone()) {
-            panic!("Trying to insert an already instered body in to a space. This should not be possible as Body::new() is the only way to create owned bodies and it always creates new bodies.");
+            panic!("Trying to insert an already instered body in to a space. This should not be \
+                    possible as Body::new() is the only way to create owned bodies and it always \
+                    creates new bodies.");
         }
 
         handle
@@ -224,7 +239,9 @@ impl<T: ChipmunkRsTypes> Space<T> {
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
     pub fn remove_shape(&mut self, shape: ShapeHandle<T>) -> Option<ShapeHandle<T>> {
         // Remove the shape from the space in C.
-        unsafe { cpSpaceRemoveShape(self.ptr, shape.borrow().to_shape()); }
+        unsafe {
+            cpSpaceRemoveShape(self.ptr, shape.borrow().to_shape());
+        }
 
         // Remove the shape from the space's managed shapes
         self.shapes.remove(&shape.borrow().to_shape())
@@ -233,7 +250,9 @@ impl<T: ChipmunkRsTypes> Space<T> {
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
     pub fn remove_body(&mut self, body: BodyHandle<T>) -> Option<BodyHandle<T>> {
         // Remove the body from the space in C.
-        unsafe { cpSpaceRemoveBody(self.ptr, body.borrow().ptr); }
+        unsafe {
+            cpSpaceRemoveBody(self.ptr, body.borrow().ptr);
+        }
 
         // Remove the body from the space's managed shapes
         self.bodies.remove(&body.borrow().ptr)
@@ -270,7 +289,9 @@ impl<T: ChipmunkRsTypes> Space<T> {
 
 impl<T: ChipmunkRsTypes> Drop for Space<T> {
     fn drop(&mut self) {
-        unsafe { cpSpaceFree(self.ptr); }
+        unsafe {
+            cpSpaceFree(self.ptr);
+        }
 
         // TODO free all resources (e.g. bodies, shapes, constraints, etc).
     }
@@ -279,32 +300,38 @@ impl<T: ChipmunkRsTypes> Drop for Space<T> {
 /// A physics Body. See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
 pub struct Body<T: ChipmunkRsTypes> {
     _marker: PhantomData<T>,
-    ptr: *const CPBody
+    ptr: *const CPBody,
 }
 
 impl<T: ChipmunkRsTypes> Body<T> {
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn new_dynamic(m: f64, i: f64) -> Body<T> {
-        unsafe { Body {
-            _marker: PhantomData,
-            ptr: cpBodyNew(m, i)
-        } }
+        unsafe {
+            Body {
+                _marker: PhantomData,
+                ptr: cpBodyNew(m, i),
+            }
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn new_static() -> Body<T> {
-        unsafe { Body {
-            _marker: PhantomData,
-            ptr: cpBodyNewStatic()
-        } }
+        unsafe {
+            Body {
+                _marker: PhantomData,
+                ptr: cpBodyNewStatic(),
+            }
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn new_kinematic() -> Body<T> {
-        unsafe { Body {
-            _marker: PhantomData,
-            ptr: cpBodyNewKinematic()
-        } }
+        unsafe {
+            Body {
+                _marker: PhantomData,
+                ptr: cpBodyNewKinematic(),
+            }
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
@@ -354,53 +381,73 @@ impl<T: ChipmunkRsTypes> Body<T> {
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_mass(&mut self, m: f64) {
-        unsafe { cpBodySetMass(self.ptr, m); }
+        unsafe {
+            cpBodySetMass(self.ptr, m);
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_moment(&mut self, i: f64) {
-        unsafe { cpBodySetMoment(self.ptr, i); }
+        unsafe {
+            cpBodySetMoment(self.ptr, i);
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_position(&mut self, pos: T::Vect) {
-        unsafe { cpBodySetPosition(self.ptr, T::to_cp_vect(&pos)); }
+        unsafe {
+            cpBodySetPosition(self.ptr, T::to_cp_vect(&pos));
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_center_of_gravity(&mut self, cog: T::Vect) {
-        unsafe { cpBodySetCenterOfGravity(self.ptr, T::to_cp_vect(&cog)); }
+        unsafe {
+            cpBodySetCenterOfGravity(self.ptr, T::to_cp_vect(&cog));
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_velocity(&mut self, value: T::Vect) {
-        unsafe { cpBodySetVelocity(self.ptr, T::to_cp_vect(&value)); }
+        unsafe {
+            cpBodySetVelocity(self.ptr, T::to_cp_vect(&value));
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_force(&mut self, value: T::Vect) {
-        unsafe { cpBodySetForce(self.ptr, T::to_cp_vect(&value)); }
+        unsafe {
+            cpBodySetForce(self.ptr, T::to_cp_vect(&value));
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_angle(&mut self, a: f64) {
-        unsafe { cpBodySetAngle(self.ptr, a); }
+        unsafe {
+            cpBodySetAngle(self.ptr, a);
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_angular_velocity(&mut self, value: f64) {
-        unsafe { cpBodySetAngularVelocity(self.ptr, value); }
+        unsafe {
+            cpBodySetAngularVelocity(self.ptr, value);
+        }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
     pub fn set_torque(&mut self, value: f64) {
-        unsafe { cpBodySetTorque(self.ptr, value); }
+        unsafe {
+            cpBodySetTorque(self.ptr, value);
+        }
     }
 }
 
 impl<T: ChipmunkRsTypes> Drop for Body<T> {
     fn drop(&mut self) {
-        unsafe { cpBodyFree(self.ptr); }
+        unsafe {
+            cpBodyFree(self.ptr);
+        }
     }
 }
 
@@ -415,7 +462,6 @@ pub trait BaseShape: Drop {
 /// A collision Shape trait. See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
 /// All shape structs implement this trait.
 pub trait Shape<T: ChipmunkRsTypes>: BaseShape {
-
     /// Get the body attached to the shape.
     fn body(&self) -> BodyHandle<T>;
 
@@ -435,24 +481,30 @@ pub trait Shape<T: ChipmunkRsTypes>: BaseShape {
 
     /// See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
     fn set_body(&mut self, body: Body<T>) {
-        unsafe { cpShapeSetBody(self.to_shape(), body.ptr); }
+        unsafe {
+            cpShapeSetBody(self.to_shape(), body.ptr);
+        }
     }
 
     /// See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
     fn set_elasticity(&mut self, value: f64) {
-        unsafe { cpShapeSetElasticity(self.to_shape(), value); }
+        unsafe {
+            cpShapeSetElasticity(self.to_shape(), value);
+        }
     }
 
     /// See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
     fn set_friction(&mut self, value: f64) {
-        unsafe { cpShapeSetFriction(self.to_shape(), value); }
+        unsafe {
+            cpShapeSetFriction(self.to_shape(), value);
+        }
     }
 }
 
 /// A CircleShape. See [Working With Circle Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Circles)
 pub struct CircleShape<T: ChipmunkRsTypes> {
     ptr: *const CPCircleShape,
-    body: BodyHandle<T>
+    body: BodyHandle<T>,
 }
 
 impl<T: ChipmunkRsTypes> CircleShape<T> {
@@ -461,7 +513,7 @@ impl<T: ChipmunkRsTypes> CircleShape<T> {
         unsafe {
             CircleShape {
                 ptr: cpCircleShapeNew(body.borrow().ptr, radius, T::to_cp_vect(&offset)),
-                body: body.clone()
+                body: body.clone(),
             }
         }
     }
@@ -479,7 +531,9 @@ impl<T: ChipmunkRsTypes> CircleShape<T> {
 
 impl<T: ChipmunkRsTypes> Drop for CircleShape<T> {
     fn drop(&mut self) {
-        unsafe { cpShapeFree(self.to_shape()); }
+        unsafe {
+            cpShapeFree(self.to_shape());
+        }
     }
 }
 
@@ -495,28 +549,64 @@ impl<T: ChipmunkRsTypes> Shape<T> for CircleShape<T> {
     }
 }
 
-/// A CircleShape. See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
+/// A PolyShape. See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
 pub struct PolyShape<T: ChipmunkRsTypes> {
     ptr: *const CPPolyShape,
-    body: BodyHandle<T>
+    body: BodyHandle<T>,
 }
 
 impl<T: ChipmunkRsTypes> PolyShape<T> {
+    /// Create a new poly shape. radius is the radius of the corners. Use `radius: 0.0` for no rounded corners.
+    /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
+    pub fn new_convex_raw(body: BodyHandle<T>, points: &[T::Vect], radius: f64) -> PolyShape<T> {
+        let points_array: &[CPVect] = &points.iter().map(|p| T::to_cp_vect(&p)).collect::<Vec<_>>();
+        unsafe {
+            PolyShape {
+                ptr: cpPolyShapeNewRaw(body.borrow().ptr,
+                                       points_array.len() as i32,
+                                       points_array.as_ptr(),
+                                       radius),
+                body: body.clone(),
+            }
+        }
+    }
+
     /// Create a new box shape. radius is the radius of the corners. Use `radius: 0.0` for no rounded corners.
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
     pub fn new_box(body: BodyHandle<T>, width: f64, height: f64, radius: f64) -> PolyShape<T> {
         unsafe {
             PolyShape {
                 ptr: cpBoxShapeNew(body.borrow().ptr, width, height, radius),
-                body: body.clone()
+                body: body.clone(),
             }
         }
+    }
+
+    /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
+    pub fn len(&self) -> usize {
+        unsafe { cpPolyShapeGetNumVerts(self.ptr) as usize }
+    }
+
+    /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
+    pub fn get(&self, index: usize) -> Option<T::Vect> {
+        if index < self.len() {
+            Some(T::to_vect(unsafe { cpPolyShapeGetVert(self.ptr, index as i32) }))
+        } else {
+            None
+        }
+    }
+
+    /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
+    pub fn radius(&self) -> f64 {
+        unsafe { cpPolyShapeGetRadius(self.ptr) }
     }
 }
 
 impl<T: ChipmunkRsTypes> Drop for PolyShape<T> {
     fn drop(&mut self) {
-        unsafe { cpShapeFree(self.to_shape()); }
+        unsafe {
+            cpShapeFree(self.to_shape());
+        }
     }
 }
 
@@ -532,14 +622,10 @@ impl<T: ChipmunkRsTypes> Shape<T> for PolyShape<T> {
     }
 }
 
-
-
-
 #[cfg(test)]
 mod tests {
 
-    use super::{ChipmunkRsTypes, CircleShape,Space,Body};
-    use super::ffi::*;
+    use super::*;
 
     enum TupleTypes {}
     impl ChipmunkRsTypes for TupleTypes {
@@ -551,6 +637,14 @@ mod tests {
         fn to_cp_vect(vect: &Self::Vect) -> CPVect {
             CPVect::new(vect.0, vect.1)
         }
+    }
+
+    #[test]
+    fn poly_shape() {
+        let mut space: Space<TupleTypes> = Space::new();
+        let body = space.add_body(Body::new_dynamic(1.0, 1.0));
+        let poly = PolyShape::new_convex_raw(body, &[(1.0, 1.0), (2.0, 1.0), (1.5, 2.0)], 0.1);
+        assert_eq!(0.1, poly.radius());
     }
 
     #[test]
