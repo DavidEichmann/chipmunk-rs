@@ -4,7 +4,7 @@
 use libc::{c_double, c_int, c_uint};
 
 #[repr(C)]
-#[derive(Clone,Copy)]
+#[derive(Clone,Copy,PartialEq,Debug)]
 /// A Chipmink2D vector.
 pub struct CPVect {
     /// The x component.
@@ -162,7 +162,7 @@ extern "C" {
                              verts: *const CPVect,
                              radius: CPFloat)
                              -> *const CPPolyShape;
-    pub fn cpPolyShapeGetNumVerts(shape: *const CPPolyShape) -> c_int;
+    pub fn cpPolyShapeGetCount(shape: *const CPPolyShape) -> c_int;
     pub fn cpPolyShapeGetVert(shape: *const CPPolyShape, index: c_int) -> CPVect;
     pub fn cpPolyShapeGetRadius(shape: *const CPPolyShape) -> CPFloat;
     //pub fn cpCentroidForPoly(count: c_int, verts: *const CPVect) -> CPVect;

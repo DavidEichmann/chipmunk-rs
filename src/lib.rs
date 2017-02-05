@@ -23,60 +23,26 @@ pub mod ffi;
 
 use std::rc::*;
 use std::cell::*;
-use std::marker::PhantomData;
 use std::collections::hash_map::*;
 
 use ffi::*;
 
-/// Implement this trait to define what types you intend to use with this library.
-///
-/// # Examples
-///
-/// To use a tuple (x, y) as the 2D vector type simple do:
-///
-/// ```
-/// use chipmunk_rs::{ ChipmunkRsTypes };
-/// use chipmunk_rs::ffi::{ CPVect };
-///
-/// enum TupleTypes {}
-/// impl ChipmunkRsTypes for TupleTypes {
-///     type Vect = (f64, f64);
-///     fn to_vect(cp_vect: CPVect) -> Self::Vect {
-///         (cp_vect.x, cp_vect.y)
-///     }
-///
-///     fn to_cp_vect(vect: &Self::Vect) -> CPVect {
-///         CPVect::new(vect.0, vect.1)
-///     }
-/// }
-/// ```
-pub trait ChipmunkRsTypes {
-    /// The 2D vector type.
-    type Vect;
+/// Reference counted handle to a `Body`.
+pub type BodyHandle = Rc<RefCell<Body>>;
 
-    /// Convert a `CPVect` to the `Vect` type.
-    fn to_vect(cp_vect: CPVect) -> Self::Vect;
-
-    /// Convert a `Vect` to the `CPVect` type.
-    fn to_cp_vect(vect: &Self::Vect) -> CPVect;
-}
-
-/// Reference counted handle to a `Body<T>`.
-pub type BodyHandle<T> = Rc<RefCell<Body<T>>>;
-
-/// Reference counted handle to a `Shape<T>`.
-pub type ShapeHandle<T> = Rc<RefCell<Box<Shape<T>>>>;
+/// Reference counted handle to a `Shape`.
+pub type ShapeHandle = Rc<RefCell<Box<Shape>>>;
 
 /// A 2D space. See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-pub struct Space<T: ChipmunkRsTypes> {
+pub struct Space {
     ptr: *const CPSpace,
-    bodies: HashMap<*const CPBody, BodyHandle<T>>,
-    shapes: HashMap<*const CPShape, ShapeHandle<T>>,
+    bodies: HashMap<*const CPBody, BodyHandle>,
+    shapes: HashMap<*const CPShape, ShapeHandle>,
 }
 
-impl<T: ChipmunkRsTypes> Space<T> {
-    /// Create a new sapce. You should set `T` explicitelly (e.g. `let mut space: Space<TupleTypes> = Space::new();`).
-    pub fn new() -> Space<T> {
+impl Space {
+    /// Create a new sapce.
+    pub fn new() -> Space {
         Space {
             ptr: unsafe { cpSpaceNew() },
             bodies: HashMap::new(),
@@ -85,8 +51,8 @@ impl<T: ChipmunkRsTypes> Space<T> {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn gravity(&self) -> T::Vect {
-        unsafe { T::to_vect(cpSpaceGetGravity(self.ptr)) }
+    pub fn gravity(&self) -> CPVect {
+        unsafe { cpSpaceGetGravity(self.ptr) }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
@@ -141,8 +107,8 @@ impl<T: ChipmunkRsTypes> Space<T> {
     // }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn set_gravity(&self, g: T::Vect) {
-        unsafe { cpSpaceSetGravity(self.ptr, T::to_cp_vect(&g)) };
+    pub fn set_gravity(&self, g: CPVect) {
+        unsafe { cpSpaceSetGravity(self.ptr, g) };
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
@@ -201,7 +167,7 @@ impl<T: ChipmunkRsTypes> Space<T> {
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace). Make sure to
     /// also insert any attached body (this is not done for you).
-    pub fn add_shape(&mut self, shape: Box<Shape<T>>) -> ShapeHandle<T> {
+    pub fn add_shape(&mut self, shape: Box<Shape>) -> ShapeHandle {
         // Add the shape to the space in C.
         unsafe {
             cpSpaceAddShape(self.ptr, shape.to_shape());
@@ -219,7 +185,7 @@ impl<T: ChipmunkRsTypes> Space<T> {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn add_body(&mut self, body: Body<T>) -> BodyHandle<T> {
+    pub fn add_body(&mut self, body: Body) -> BodyHandle {
         // Add the body to the space in C.
         unsafe {
             cpSpaceAddBody(self.ptr, body.ptr);
@@ -237,7 +203,7 @@ impl<T: ChipmunkRsTypes> Space<T> {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn remove_shape(&mut self, shape: ShapeHandle<T>) -> Option<ShapeHandle<T>> {
+    pub fn remove_shape(&mut self, shape: ShapeHandle) -> Option<ShapeHandle> {
         // Remove the shape from the space in C.
         unsafe {
             cpSpaceRemoveShape(self.ptr, shape.borrow().to_shape());
@@ -248,7 +214,7 @@ impl<T: ChipmunkRsTypes> Space<T> {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn remove_body(&mut self, body: BodyHandle<T>) -> Option<BodyHandle<T>> {
+    pub fn remove_body(&mut self, body: BodyHandle) -> Option<BodyHandle> {
         // Remove the body from the space in C.
         unsafe {
             cpSpaceRemoveBody(self.ptr, body.borrow().ptr);
@@ -259,12 +225,12 @@ impl<T: ChipmunkRsTypes> Space<T> {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn contains_shape(&self, shape: ShapeHandle<T>) -> bool {
+    pub fn contains_shape(&self, shape: ShapeHandle) -> bool {
         unsafe { cpSpaceContainsShape(self.ptr, shape.borrow().to_shape()) }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn contains_body(&self, body: BodyHandle<T>) -> bool {
+    pub fn contains_body(&self, body: BodyHandle) -> bool {
         unsafe { cpSpaceContainsBody(self.ptr, body.borrow().ptr) }
     }
 
@@ -274,10 +240,10 @@ impl<T: ChipmunkRsTypes> Space<T> {
     // cpBool cpSpaceContainsConstraint(&self, constraint: cpConstraint)
 
     // TODO reindexing
-    //pub fn reindex_shape<S: Shape<T>>(&mut self, shape: S) {
+    //pub fn reindex_shape<S: Shape>(&mut self, shape: S) {
     //    unsafe { cpSpaceReindexShape(self.ptr, shape.to_shape()); }
     //}
-    //pub fn reindex_shapes_for_body(&mut self, body: Body<T>) {
+    //pub fn reindex_shapes_for_body(&mut self, body: Body) {
     //    unsafe { cpSpaceReindexShapesForBody(self.ptr, body.ptr); }
     //}
     //pub fn reindex_static(&mut self) {
@@ -287,7 +253,7 @@ impl<T: ChipmunkRsTypes> Space<T> {
     // TODO iterators for body/shape/constraint
 }
 
-impl<T: ChipmunkRsTypes> Drop for Space<T> {
+impl Drop for Space {
     fn drop(&mut self) {
         unsafe {
             cpSpaceFree(self.ptr);
@@ -298,60 +264,44 @@ impl<T: ChipmunkRsTypes> Drop for Space<T> {
 }
 
 /// A physics Body. See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-pub struct Body<T: ChipmunkRsTypes> {
-    _marker: PhantomData<T>,
+pub struct Body {
     ptr: *const CPBody,
 }
 
-impl<T: ChipmunkRsTypes> Body<T> {
+impl Body {
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn new_dynamic(m: f64, i: f64) -> Body<T> {
-        unsafe {
-            Body {
-                _marker: PhantomData,
-                ptr: cpBodyNew(m, i),
-            }
-        }
+    pub fn new_dynamic(m: f64, i: f64) -> Body {
+        unsafe { Body { ptr: cpBodyNew(m, i) } }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn new_static() -> Body<T> {
-        unsafe {
-            Body {
-                _marker: PhantomData,
-                ptr: cpBodyNewStatic(),
-            }
-        }
+    pub fn new_static() -> Body {
+        unsafe { Body { ptr: cpBodyNewStatic() } }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn new_kinematic() -> Body<T> {
-        unsafe {
-            Body {
-                _marker: PhantomData,
-                ptr: cpBodyNewKinematic(),
-            }
-        }
+    pub fn new_kinematic() -> Body {
+        unsafe { Body { ptr: cpBodyNewKinematic() } }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn position(&self) -> T::Vect {
-        unsafe { T::to_vect(cpBodyGetPosition(self.ptr)) }
+    pub fn position(&self) -> CPVect {
+        unsafe { cpBodyGetPosition(self.ptr) }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn center_of_gravity(&self) -> T::Vect {
-        unsafe { T::to_vect(cpBodyGetCenterOfGravity(self.ptr)) }
+    pub fn center_of_gravity(&self) -> CPVect {
+        unsafe { cpBodyGetCenterOfGravity(self.ptr) }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn velocity(&self) -> T::Vect {
-        unsafe { T::to_vect(cpBodyGetVelocity(self.ptr)) }
+    pub fn velocity(&self) -> CPVect {
+        unsafe { cpBodyGetVelocity(self.ptr) }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn force(&self) -> T::Vect {
-        unsafe { T::to_vect(cpBodyGetForce(self.ptr)) }
+    pub fn force(&self) -> CPVect {
+        unsafe { cpBodyGetForce(self.ptr) }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
@@ -370,8 +320,8 @@ impl<T: ChipmunkRsTypes> Body<T> {
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn rotation(&self) -> T::Vect {
-        unsafe { T::to_vect(cpBodyGetRotation(self.ptr)) }
+    pub fn rotation(&self) -> CPVect {
+        unsafe { cpBodyGetRotation(self.ptr) }
     }
 
     // TODO This is a circular reference. How can we maintain memory safety with this?
@@ -394,30 +344,30 @@ impl<T: ChipmunkRsTypes> Body<T> {
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn set_position(&mut self, pos: T::Vect) {
+    pub fn set_position(&mut self, pos: CPVect) {
         unsafe {
-            cpBodySetPosition(self.ptr, T::to_cp_vect(&pos));
+            cpBodySetPosition(self.ptr, pos);
         }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn set_center_of_gravity(&mut self, cog: T::Vect) {
+    pub fn set_center_of_gravity(&mut self, cog: CPVect) {
         unsafe {
-            cpBodySetCenterOfGravity(self.ptr, T::to_cp_vect(&cog));
+            cpBodySetCenterOfGravity(self.ptr, cog);
         }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn set_velocity(&mut self, value: T::Vect) {
+    pub fn set_velocity(&mut self, value: CPVect) {
         unsafe {
-            cpBodySetVelocity(self.ptr, T::to_cp_vect(&value));
+            cpBodySetVelocity(self.ptr, value);
         }
     }
 
     /// See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
-    pub fn set_force(&mut self, value: T::Vect) {
+    pub fn set_force(&mut self, value: CPVect) {
         unsafe {
-            cpBodySetForce(self.ptr, T::to_cp_vect(&value));
+            cpBodySetForce(self.ptr, value);
         }
     }
 
@@ -443,7 +393,7 @@ impl<T: ChipmunkRsTypes> Body<T> {
     }
 }
 
-impl<T: ChipmunkRsTypes> Drop for Body<T> {
+impl Drop for Body {
     fn drop(&mut self) {
         unsafe {
             cpBodyFree(self.ptr);
@@ -461,13 +411,13 @@ pub trait BaseShape: Drop {
 
 /// A collision Shape trait. See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
 /// All shape structs implement this trait.
-pub trait Shape<T: ChipmunkRsTypes>: BaseShape {
+pub trait Shape: BaseShape {
     /// Get the body attached to the shape.
-    fn body(&self) -> BodyHandle<T>;
+    fn body(&self) -> BodyHandle;
 
     // TODO Circular reference to space.
-    // fn space(&self) -> &Space<T>;
-    // fn space_mut(&mut self) -> &mut Space<T>;
+    // fn space(&self) -> &Space;
+    // fn space_mut(&mut self) -> &mut Space;
 
     /// See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
     fn elasticity(&self) -> f64 {
@@ -480,7 +430,7 @@ pub trait Shape<T: ChipmunkRsTypes>: BaseShape {
     }
 
     /// See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
-    fn set_body(&mut self, body: Body<T>) {
+    fn set_body(&mut self, body: Body) {
         unsafe {
             cpShapeSetBody(self.to_shape(), body.ptr);
         }
@@ -502,25 +452,25 @@ pub trait Shape<T: ChipmunkRsTypes>: BaseShape {
 }
 
 /// A CircleShape. See [Working With Circle Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Circles)
-pub struct CircleShape<T: ChipmunkRsTypes> {
+pub struct CircleShape {
     ptr: *const CPCircleShape,
-    body: BodyHandle<T>,
+    body: BodyHandle,
 }
 
-impl<T: ChipmunkRsTypes> CircleShape<T> {
+impl CircleShape {
     /// Create a new circle shape. See [Working With Circle Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Circles)
-    pub fn new(body: BodyHandle<T>, radius: f64, offset: T::Vect) -> CircleShape<T> {
+    pub fn new(body: BodyHandle, radius: f64, offset: CPVect) -> CircleShape {
         unsafe {
             CircleShape {
-                ptr: cpCircleShapeNew(body.borrow().ptr, radius, T::to_cp_vect(&offset)),
+                ptr: cpCircleShapeNew(body.borrow().ptr, radius, offset),
                 body: body.clone(),
             }
         }
     }
 
     /// See [Working With Circle Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Circles)
-    pub fn offset(&self) -> T::Vect {
-        unsafe { T::to_vect(cpCircleShapeGetOffset(self.ptr)) }
+    pub fn offset(&self) -> CPVect {
+        unsafe { cpCircleShapeGetOffset(self.ptr) }
     }
 
     /// See [Working With Circle Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Circles)
@@ -529,7 +479,7 @@ impl<T: ChipmunkRsTypes> CircleShape<T> {
     }
 }
 
-impl<T: ChipmunkRsTypes> Drop for CircleShape<T> {
+impl Drop for CircleShape {
     fn drop(&mut self) {
         unsafe {
             cpShapeFree(self.to_shape());
@@ -537,34 +487,33 @@ impl<T: ChipmunkRsTypes> Drop for CircleShape<T> {
     }
 }
 
-impl<T: ChipmunkRsTypes> BaseShape for CircleShape<T> {
+impl BaseShape for CircleShape {
     fn to_shape(&self) -> *const CPShape {
         self.ptr as *const CPShape
     }
 }
 
-impl<T: ChipmunkRsTypes> Shape<T> for CircleShape<T> {
-    fn body(&self) -> BodyHandle<T> {
+impl Shape for CircleShape {
+    fn body(&self) -> BodyHandle {
         self.body.clone()
     }
 }
 
 /// A PolyShape. See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
-pub struct PolyShape<T: ChipmunkRsTypes> {
+pub struct PolyShape {
     ptr: *const CPPolyShape,
-    body: BodyHandle<T>,
+    body: BodyHandle,
 }
 
-impl<T: ChipmunkRsTypes> PolyShape<T> {
+impl PolyShape {
     /// Create a new poly shape. radius is the radius of the corners. Use `radius: 0.0` for no rounded corners.
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
-    pub fn new_convex_raw(body: BodyHandle<T>, points: &[T::Vect], radius: f64) -> PolyShape<T> {
-        let points_array: &[CPVect] = &points.iter().map(|p| T::to_cp_vect(&p)).collect::<Vec<_>>();
+    pub fn new_convex_raw(body: BodyHandle, points: &[CPVect], radius: f64) -> PolyShape {
         unsafe {
             PolyShape {
                 ptr: cpPolyShapeNewRaw(body.borrow().ptr,
-                                       points_array.len() as i32,
-                                       points_array.as_ptr(),
+                                       points.len() as i32,
+                                       points.as_ptr(),
                                        radius),
                 body: body.clone(),
             }
@@ -573,7 +522,7 @@ impl<T: ChipmunkRsTypes> PolyShape<T> {
 
     /// Create a new box shape. radius is the radius of the corners. Use `radius: 0.0` for no rounded corners.
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
-    pub fn new_box(body: BodyHandle<T>, width: f64, height: f64, radius: f64) -> PolyShape<T> {
+    pub fn new_box(body: BodyHandle, width: f64, height: f64, radius: f64) -> PolyShape {
         unsafe {
             PolyShape {
                 ptr: cpBoxShapeNew(body.borrow().ptr, width, height, radius),
@@ -584,13 +533,13 @@ impl<T: ChipmunkRsTypes> PolyShape<T> {
 
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
     pub fn len(&self) -> usize {
-        unsafe { cpPolyShapeGetNumVerts(self.ptr) as usize }
+        unsafe { cpPolyShapeGetCount(self.ptr) as usize }
     }
 
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
-    pub fn get(&self, index: usize) -> Option<T::Vect> {
+    pub fn get(&self, index: usize) -> Option<CPVect> {
         if index < self.len() {
-            Some(T::to_vect(unsafe { cpPolyShapeGetVert(self.ptr, index as i32) }))
+            Some(unsafe { cpPolyShapeGetVert(self.ptr, index as i32) })
         } else {
             None
         }
@@ -602,7 +551,7 @@ impl<T: ChipmunkRsTypes> PolyShape<T> {
     }
 }
 
-impl<T: ChipmunkRsTypes> Drop for PolyShape<T> {
+impl Drop for PolyShape {
     fn drop(&mut self) {
         unsafe {
             cpShapeFree(self.to_shape());
@@ -610,14 +559,14 @@ impl<T: ChipmunkRsTypes> Drop for PolyShape<T> {
     }
 }
 
-impl<T: ChipmunkRsTypes> BaseShape for PolyShape<T> {
+impl BaseShape for PolyShape {
     fn to_shape(&self) -> *const CPShape {
         self.ptr as *const CPShape
     }
 }
 
-impl<T: ChipmunkRsTypes> Shape<T> for PolyShape<T> {
-    fn body(&self) -> BodyHandle<T> {
+impl Shape for PolyShape {
+    fn body(&self) -> BodyHandle {
         self.body.clone()
     }
 }
@@ -627,70 +576,70 @@ mod tests {
 
     use super::*;
 
-    enum TupleTypes {}
-    impl ChipmunkRsTypes for TupleTypes {
-        type Vect = (f64, f64);
-        fn to_vect(cp_vect: CPVect) -> Self::Vect {
-            (cp_vect.x, cp_vect.y)
-        }
-
-        fn to_cp_vect(vect: &Self::Vect) -> CPVect {
-            CPVect::new(vect.0, vect.1)
-        }
-    }
-
     #[test]
     fn poly_shape() {
-        let mut space: Space<TupleTypes> = Space::new();
+        let mut space: Space = Space::new();
         let body = space.add_body(Body::new_dynamic(1.0, 1.0));
-        let poly = PolyShape::new_convex_raw(body, &[(1.0, 1.0), (2.0, 1.0), (1.5, 2.0)], 0.1);
+        let points = [CPVect::new(1.0, 1.0), CPVect::new(2.0, 1.0), CPVect::new(1.5, 2.0)];
+        let poly = {
+            let points_clone = points.clone();
+            PolyShape::new_convex_raw(body, &points_clone, 0.1)
+        };
+
         assert_eq!(0.1, poly.radius());
+        assert_eq!(points.len(), poly.len());
+        assert_eq!(None, poly.get(points.len()));
+        assert_eq!(None, poly.get(points.len() + 1));
+        assert_eq!(None, poly.get(points.len() + 2));
+        for (i, &p) in points.iter().enumerate() {
+            assert_eq!(Some(p), poly.get(i));
+        }
     }
 
     #[test]
     fn gravity() {
         // Create a space with gravity.
-        let mut space: Space<TupleTypes> = Space::new();
-        space.set_gravity((1.0, 2.0));
+        let mut space: Space = Space::new();
+        space.set_gravity(CPVect::new(1.0, 2.0));
 
         // Create a dynamic body and add it to the space.
         let body_handle = space.add_body(Body::new_dynamic(1.0, 1.0));
-        space.add_shape(Box::new(CircleShape::new(body_handle.clone(), 1.0, (0.0, 0.0))));
-        body_handle.borrow_mut().set_position((-1.0, -2.0));
+        space.add_shape(Box::new(CircleShape::new(body_handle.clone(), 1.0, CPVect::new(0.0, 0.0))));
+        body_handle.borrow_mut().set_position(CPVect::new(-1.0, -2.0));
 
         // Let the ball fall and check that the velocity/position change.
-        assert_eq!((0.0, 0.0), body_handle.borrow().velocity());
-        assert_eq!((-1.0, -2.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(0.0, 0.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(-1.0, -2.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((1.0, 2.0), body_handle.borrow().velocity());
-        assert_eq!((-1.0, -2.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(1.0, 2.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(-1.0, -2.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((2.0, 4.0), body_handle.borrow().velocity());
-        assert_eq!((0.0, 0.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(2.0, 4.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(0.0, 0.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((3.0, 6.0), body_handle.borrow().velocity());
-        assert_eq!((2.0, 4.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(3.0, 6.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(2.0, 4.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((4.0, 8.0), body_handle.borrow().velocity());
-        assert_eq!((5.0, 10.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(4.0, 8.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(5.0, 10.0), body_handle.borrow().position());
 
         // Reset velocity/position and check again
-        body_handle.borrow_mut().set_position((-1.0, -2.0));
-        body_handle.borrow_mut().set_velocity((0.0, 0.0));
+        body_handle.borrow_mut().set_position(CPVect::new(-1.0, -2.0));
+        body_handle.borrow_mut().set_velocity(CPVect::new(0.0, 0.0));
 
-        assert_eq!((0.0, 0.0), body_handle.borrow().velocity());
-        assert_eq!((-1.0, -2.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(0.0, 0.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(-1.0, -2.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((1.0, 2.0), body_handle.borrow().velocity());
-        assert_eq!((-1.0, -2.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(1.0, 2.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(-1.0, -2.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((2.0, 4.0), body_handle.borrow().velocity());
-        assert_eq!((0.0, 0.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(2.0, 4.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(0.0, 0.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((3.0, 6.0), body_handle.borrow().velocity());
-        assert_eq!((2.0, 4.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(3.0, 6.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(2.0, 4.0), body_handle.borrow().position());
         space.step(1.0);
-        assert_eq!((4.0, 8.0), body_handle.borrow().velocity());
-        assert_eq!((5.0, 10.0), body_handle.borrow().position());
+        assert_eq!(CPVect::new(4.0, 8.0), body_handle.borrow().velocity());
+        assert_eq!(CPVect::new(5.0, 10.0), body_handle.borrow().position());
     }
 }
