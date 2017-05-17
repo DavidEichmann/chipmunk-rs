@@ -27,17 +27,21 @@ use std::collections::hash_map::*;
 
 use ffi::*;
 
-/// Reference counted handle to a `Body`.
-pub type BodyHandle = Rc<RefCell<Body>>;
-
-/// Reference counted handle to a `Shape`.
-pub type ShapeHandle = Rc<RefCell<Box<Shape>>>;
-
 /// A 2D space. See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
 pub struct Space {
     ptr: *const CPSpace,
     bodies: HashMap<*const CPBody, BodyHandle>,
     shapes: HashMap<*const CPShape, ShapeHandle>,
+    pin_joints: HashMap<*const CPPinJoint, PinJointHandle>,
+    slide_joints: HashMap<*const CPSlideJoint, SlideJointHandle>,
+    pivot_joints: HashMap<*const CPPivotJoint, PivotJointHandle>,
+    groove_joints: HashMap<*const CPGrooveJoint, GrooveJointHandle>,
+    damped_springs: HashMap<*const CPDampedSpring, DampedSpringHandle>,
+    damped_rotary_springs: HashMap<*const CPDampedRotarySpring, DampedRotarySpringHandle>,
+    rotary_limit_joints: HashMap<*const CPRotaryLimitJoint, RotaryLimitJointHandle>,
+    ratchet_joints: HashMap<*const CPRatchetJoint, RatchetJointHandle>,
+    gear_joints: HashMap<*const CPGearJoint, GearJointHandle>,
+    simple_motors: HashMap<*const CPSimpleMotor, SimpleMotorHandle>,
 }
 
 impl Space {
@@ -47,6 +51,16 @@ impl Space {
             ptr: unsafe { cpSpaceNew() },
             bodies: HashMap::new(),
             shapes: HashMap::new(),
+            pin_joints: HashMap::new(),
+            slide_joints: HashMap::new(),
+            pivot_joints: HashMap::new(),
+            groove_joints: HashMap::new(),
+            damped_springs: HashMap::new(),
+            damped_rotary_springs: HashMap::new(),
+            rotary_limit_joints: HashMap::new(),
+            ratchet_joints: HashMap::new(),
+            gear_joints: HashMap::new(),
+            simple_motors: HashMap::new(),
         }
     }
 
@@ -234,10 +248,125 @@ impl Space {
         unsafe { cpSpaceContainsBody(self.ptr, body.borrow().ptr) }
     }
 
-    // TODO Constraints
+    /// Add a PinJoint constraint.
+    pub fn add_pin_joint(&mut self, pin_joint: PinJoint) -> PinJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, pin_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(pin_joint));
+        if let Some(_) = self.pin_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted pin_joint.")
+        }
+
+        handle
+    }
+
+    /// Add a SlideJoint constraint.
+    pub fn add_slide_joint(&mut self, slide_joint: SlideJoint) -> SlideJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, slide_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(slide_joint));
+        if let Some(_) = self.slide_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted slide_joint.")
+        }
+
+        handle
+    }
+
+    /// Add a PivotJoint constraint.
+    pub fn add_pivot_joint(&mut self, pivot_joint: PivotJoint) -> PivotJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, pivot_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(pivot_joint));
+        if let Some(_) = self.pivot_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted pivot_joint.")
+        }
+
+        handle
+    }
+
+    /// Add a GrooveJoint constraint.
+    pub fn add_groove_joint(&mut self, groove_joint: GrooveJoint) -> GrooveJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, groove_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(groove_joint));
+        if let Some(_) = self.groove_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted groove_joint.")
+        }
+
+        handle
+    }
+
+    /// Add a DampedSpring constraint.
+    pub fn add_damped_spring(&mut self, damped_spring: DampedSpring) -> DampedSpringHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, damped_spring.to_constraint()) }
+        let handle = Rc::new(RefCell::new(damped_spring));
+        if let Some(_) = self.damped_springs.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted , .")
+        }
+
+        handle
+    }
+
+    /// Add a DampedRotarySpring constraint.
+    pub fn add_damped_rotary_spring(&mut self, damped_rotary_spring: DampedRotarySpring) -> DampedRotarySpringHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, damped_rotary_spring.to_constraint()) }
+        let handle = Rc::new(RefCell::new(damped_rotary_spring));
+        if let Some(_) = self.damped_rotary_springs.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted , .")
+        }
+
+        handle
+    }
+
+    /// Add a RotaryLimitJoint constraint.
+    pub fn add_rotary_limit_joint(&mut self, rotary_limit_joint: RotaryLimitJoint) -> RotaryLimitJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, rotary_limit_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(rotary_limit_joint));
+        if let Some(_) = self.rotary_limit_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted , .")
+        }
+
+        handle
+    }
+
+    /// Add a RatchetJoint constraint.
+    pub fn add_ratchet_joint(&mut self, ratchet_joint: RatchetJoint) -> RatchetJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, ratchet_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(ratchet_joint));
+        if let Some(_) = self.ratchet_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted , .")
+        }
+
+        handle
+    }
+
+    /// Add a GearJoint constraint.
+    pub fn add_gear_joint(&mut self, gear_joint: GearJoint) -> GearJointHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, gear_joint.to_constraint()) }
+        let handle = Rc::new(RefCell::new(gear_joint));
+        if let Some(_) = self.gear_joints.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted gear_joint.")
+        }
+
+        handle
+    }
+
+    /// Add a SimpleMotor constraint.
+    pub fn add_simple_motor(&mut self, simple_motor: SimpleMotor) -> SimpleMotorHandle {
+        unsafe { cpSpaceAddConstraint(self.ptr, simple_motor.to_constraint()) }
+        let handle = Rc::new(RefCell::new(simple_motor));
+        if let Some(_) = self.simple_motors.insert(handle.borrow().ptr, handle.clone()) {
+            panic!("Inserting an already inserted simple_motor.")
+        }
+
+        handle
+    }
+
     // cpConstraint *cpSpaceAddConstraint(&self, constraint: cpConstraint)
     // pub fn remove_constraint(&self, constraint: cpConstraint);
-    // cpBool cpSpaceContainsConstraint(&self, constraint: cpConstraint)
+    
+    /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
+    pub fn contains_constraint<C>(&self, constraint: C) -> bool
+        where C: Constraint
+    {
+        unsafe { cpSpaceContainsConstraint(self.ptr, constraint.to_constraint()) }
+    }
 
     // TODO reindexing
     //pub fn reindex_shape<S: Shape>(&mut self, shape: S) {
@@ -258,10 +387,11 @@ impl Drop for Space {
         unsafe {
             cpSpaceFree(self.ptr);
         }
-
-        // TODO free all resources (e.g. bodies, shapes, constraints, etc).
     }
 }
+
+/// Reference counted handle to a `Body`.
+pub type BodyHandle = Rc<RefCell<Body>>;
 
 /// A physics Body. See [Chipmunk Rigid Bodies](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpBody).
 pub struct Body {
@@ -405,7 +535,47 @@ impl Drop for Body {
 pub trait Constraint: Drop {
     /// Convert this constraint to a constraint pointer.
     fn to_constraint(&self) -> *const CPConstraint;
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn max_force(&self) -> CPFloat {
+        unsafe { cpConstraintGetMaxForce(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn error_bias(&self) -> CPFloat {
+        unsafe { cpConstraintGetErrorBias(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn max_bias(&self) -> CPFloat {
+        unsafe { cpConstraintGetMaxBias(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn collide_bodies(&self) -> bool {
+        unsafe { cpConstraintGetCollideBodies(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn set_max_force(&self, value: CPFloat) {
+        unsafe { cpConstraintSetMaxForce(self.to_constraint(), value) }
+    }
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn set_error_bias(&self, value: CPFloat) {
+        unsafe { cpConstraintSetErrorBias(self.to_constraint(), value) }
+    }
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn set_max_bias(&self, value: CPFloat) {
+        unsafe { cpConstraintSetMaxBias(self.to_constraint(), value) }
+    }
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpConstraint-Properties).
+    fn set_collide_bodies(&self, collide_bodies: bool) {
+        unsafe { cpConstraintSetCollideBodies(self.to_constraint(), collide_bodies) }
+    }
 }
+
+/// Reference counted handle to a `XXX`.
+pub type PinJointHandle = Rc<RefCell<PinJoint>>;
 
 /// A pin joint.
 pub struct PinJoint {
@@ -467,6 +637,9 @@ impl Drop for PinJoint {
         }
     }
 }
+
+/// Reference counted handle to a `SlideJoint`.
+pub type SlideJointHandle = Rc<RefCell<SlideJoint>>;
 
 /// A Slide Joint.
 pub struct SlideJoint {
@@ -538,6 +711,9 @@ impl Drop for SlideJoint {
     }
 }
 
+/// Reference counted handle to a `PivotJoint`.
+pub type PivotJointHandle = Rc<RefCell<PivotJoint>>;
+
 /// A Pivot Joint.
 pub struct PivotJoint {
     ptr: *const CPPivotJoint,
@@ -587,6 +763,9 @@ impl Drop for PivotJoint {
         }
     }
 }
+
+/// Reference counted handle to a `GrooveJoint`.
+pub type GrooveJointHandle = Rc<RefCell<GrooveJoint>>;
 
 /// A Groove Joint.
 pub struct GrooveJoint {
@@ -647,6 +826,9 @@ impl Drop for GrooveJoint {
         }
     }
 }
+
+/// Reference counted handle to a `DampedSpring`.
+pub type DampedSpringHandle = Rc<RefCell<DampedSpring>>;
 
 /// A Damped Spring.
 pub struct DampedSpring {
@@ -728,6 +910,9 @@ impl Drop for DampedSpring {
     }
 }
 
+/// Reference counted handle to a `DampedRotarySpring`.
+pub type DampedRotarySpringHandle = Rc<RefCell<DampedRotarySpring>>;
+
 /// A Damped Rotary Spring.
 pub struct DampedRotarySpring {
     ptr: *const CPDampedRotarySpring,
@@ -788,6 +973,9 @@ impl Drop for DampedRotarySpring {
     }
 }
 
+/// Reference counted handle to a `RotaryLimitJoint`.
+pub type RotaryLimitJointHandle = Rc<RefCell<RotaryLimitJoint>>;
+
 /// A Rotary Limit Joint.
 pub struct RotaryLimitJoint {
     ptr: *const CPRotaryLimitJoint,
@@ -837,6 +1025,9 @@ impl Drop for RotaryLimitJoint {
         }
     }
 }
+
+/// Reference counted handle to a `RatchetJoint`.
+pub type RatchetJointHandle = Rc<RefCell<RatchetJoint>>;
 
 /// A Ratchet Joint.
 pub struct RatchetJoint {
@@ -898,6 +1089,9 @@ impl Drop for RatchetJoint {
     }
 }
 
+/// Reference counted handle to a `GearJoint`.
+pub type GearJointHandle = Rc<RefCell<GearJoint>>;
+
 /// A Gear Joint.
 pub struct GearJoint {
     ptr: *const CPGearJoint,
@@ -948,6 +1142,9 @@ impl Drop for GearJoint {
     }
 }
 
+/// Reference counted handle to a `SimpleMotor`.
+pub type SimpleMotorHandle = Rc<RefCell<SimpleMotor>>;
+
 /// A Simple Motor.
 pub struct SimpleMotor {
     ptr: *const CPSimpleMotor,
@@ -989,6 +1186,8 @@ impl Drop for SimpleMotor {
     }
 }
 
+/// Reference counted handle to a `Shape`.
+pub type ShapeHandle = Rc<RefCell<Box<Shape>>>;
 
 // TODO is there a way to make ShapeBase private?
 /// A collision Shape base trait. See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).

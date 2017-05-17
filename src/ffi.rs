@@ -107,9 +107,9 @@ extern "C" {
     pub fn cpSpaceRemoveBody(space: *const CPSpace, body: *const CPBody);
     pub fn cpSpaceContainsShape(space: *const CPSpace, shape: *const CPShape) -> bool;
     pub fn cpSpaceContainsBody(space: *const CPSpace, body: *const CPBody) -> bool;
-    pub fn cpSpaceAddConstraint(space: *const CPSpace, constraint: CPConstraint);
-    pub fn cpSpaceRemoveConstraint(space: *const CPSpace, constraint: CPConstraint);
-    pub fn cpSpaceContainsConstraint(space: *const CPSpace, constraint: CPConstraint) -> bool;
+    pub fn cpSpaceAddConstraint(space: *const CPSpace, constraint: *const CPConstraint);
+    pub fn cpSpaceRemoveConstraint(space: *const CPSpace, constraint: *const CPConstraint);
+    pub fn cpSpaceContainsConstraint(space: *const CPSpace, constraint: *const CPConstraint) -> bool;
 
     pub fn cpSpaceReindexShape(space: *const CPSpace, shape: *const CPShape);
     pub fn cpSpaceReindexShapesForBody(space: *const CPSpace, body: *const CPBody);
@@ -119,6 +119,17 @@ extern "C" {
 
     // Constraint
     pub fn cpConstraintFree(constraint: *const CPConstraint);
+    // cpBody * cpConstraintGetA(constraint: *const CPConstraint)
+    // cpBody * cpConstraintGetB(constraint: *const CPConstraint)
+    // cpSpace* cpConstraintGetSpace(constraint: *const CPConstraint)
+    pub fn cpConstraintGetMaxForce(constraint: *const CPConstraint) -> CPFloat;
+    pub fn cpConstraintGetErrorBias(constraint: *const CPConstraint) -> CPFloat;
+    pub fn cpConstraintGetMaxBias(constraint: *const CPConstraint) -> CPFloat;
+    pub fn cpConstraintGetCollideBodies(constraint: *const CPConstraint) -> bool;
+    pub fn cpConstraintSetMaxForce(constraint: *const CPConstraint, value: CPFloat);
+    pub fn cpConstraintSetErrorBias(constraint: *const CPConstraint, value: CPFloat);
+    pub fn cpConstraintSetMaxBias(constraint: *const CPConstraint, value: CPFloat);
+    pub fn cpConstraintSetCollideBodies(constraint: *const CPConstraint, collideBodies: bool);
 
     // Pin Joints
     pub fn cpPinJointAlloc() -> *const CPPinJoint;
