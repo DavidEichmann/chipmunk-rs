@@ -5,7 +5,7 @@
 //!
 //! Tested on Chipmunk2D 7.0.1
 //!
-//! These bindings provide a memory safety, but otherwise attempts to stay close to the
+//! These bindings add memory safety but otherwise attempts to stay close to the
 //! original API. See the official [Chipmunk2D 7.0.1 manual](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/) for details on how to use the API.
 //! These bindings are not zero-cost. Some overhead is due to memory safety related code. This cost may be reduced in future releases. Alternativelly, the ffi module
 //! provides raw API bindings (use at your own risk).
