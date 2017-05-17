@@ -401,6 +401,595 @@ impl Drop for Body {
     }
 }
 
+/// Trait for all constraint types.
+pub trait Constraint: Drop {
+    /// Convert this constraint to a constraint pointer.
+    fn to_constraint(&self) -> *const CPConstraint;
+}
+
+/// A pin joint.
+pub struct PinJoint {
+    ptr: *const CPPinJoint,
+}
+
+impl PinJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect) -> PinJoint {
+        unsafe {
+            PinJoint {
+                ptr: cpPinJointNew(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b) as *const CPPinJoint
+
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn anchor_a(&self) -> CPVect {
+        unsafe { cpPinJointGetanchorA(self.to_constraint()) }
+    }
+    
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn anchor_b(&self) -> CPVect {
+        unsafe { cpPinJointGetanchorB(self.to_constraint()) }
+    }
+    
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn dist(&self) -> CPFloat {
+        unsafe { cpPinJointGetDist(self.to_constraint()) }
+    }
+    
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn setanchor_a(&self, value: CPVect) {
+        unsafe { cpPinJointSetanchorA(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn setanchor_b(&self, value: CPVect) {
+        unsafe { cpPinJointSetanchorB(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
+    pub fn set_dist(&self, value: CPFloat) {
+        unsafe { cpPinJointSetDist(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for PinJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for PinJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Slide Joint.
+pub struct SlideJoint {
+    ptr: *const CPSlideJoint,
+}
+
+impl SlideJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect, min: CPFloat, max: CPFloat) -> SlideJoint {
+        unsafe {
+            SlideJoint {
+                ptr: cpSlideJointNew(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b, min, max) as *const CPSlideJoint
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn anchor_a(&self) -> CPVect {
+        unsafe { cpSlideJointGetanchorA(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn anchor_b(&self) -> CPVect {
+        unsafe { cpSlideJointGetanchorB(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn min(&self) -> CPFloat {
+        unsafe { cpSlideJointGetMin(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn max(&self) -> CPFloat {
+        unsafe { cpSlideJointGetMax(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn set_anchor_a(&self, value: CPVect) {
+        unsafe { cpSlideJointSetanchorA(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn set_anchor_b(&self, value: CPVect) {
+        unsafe { cpSlideJointSetanchorB(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn set_min(&self, value: CPFloat) {
+        unsafe { cpSlideJointSetMin(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
+    pub fn set_max(&self, value: CPFloat) {
+        unsafe { cpSlideJointSetMax(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for SlideJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for SlideJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Pivot Joint.
+pub struct PivotJoint {
+    ptr: *const CPPivotJoint,
+}
+
+impl PivotJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPivotJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect) -> PivotJoint {
+        unsafe {
+            PivotJoint {
+                ptr: cpPivotJointNew2(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b) as *const CPPivotJoint
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPivotJoint).
+    pub fn anchor_a(&self) -> CPVect {
+        unsafe { cpPivotJointGetanchorA(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPivotJoint).
+    pub fn anchor_b(&self) -> CPVect {
+        unsafe { cpPivotJointGetanchorB(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPivotJoint).
+    pub fn set_anchor_a(&self, value: CPVect) {
+        unsafe { cpPivotJointSetanchorA(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPivotJoint).
+    pub fn set_anchor_b(&self, value: CPVect) {
+        unsafe { cpPivotJointSetanchorB(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for PivotJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for PivotJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Groove Joint.
+pub struct GrooveJoint {
+    ptr: *const CPGrooveJoint,
+}
+
+impl GrooveJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, groove_a: CPVect, groove_b: CPVect, anchor_b: CPVect) -> GrooveJoint {
+        unsafe {
+            GrooveJoint {
+                ptr: cpGrooveJointNew(body_a.borrow().ptr, body_b.borrow().ptr, groove_a, groove_b, anchor_b) as *const CPGrooveJoint
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn groove_a(&self) -> CPVect {
+        unsafe { cpGrooveJointGetGrooveA(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn groove_b(&self) -> CPVect {
+        unsafe { cpGrooveJointGetGrooveB(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn anchor_b(&self) -> CPVect {
+        unsafe { cpGrooveJointGetanchorB(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn set_groove_a(&self, value: CPVect) {
+        unsafe { cpGrooveJointSetGrooveA(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn set_groove_b(&self, value: CPVect) {
+        unsafe { cpGrooveJointSetGrooveB(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
+    pub fn set_anchor_b(&self, value: CPVect) {
+        unsafe { cpGrooveJointSetanchorB(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for GrooveJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for GrooveJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Damped Spring.
+pub struct DampedSpring {
+    ptr: *const CPDampedSpring,
+}
+
+impl DampedSpring {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect, rest_length: CPFloat, stiffness: CPFloat, damping: CPFloat) -> DampedSpring {
+        unsafe {
+            DampedSpring {
+                ptr: cpDampedSpringNew(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b, rest_length, stiffness, damping) as *const CPDampedSpring
+            }
+        }
+    }
+    
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn anchor_a(&self) -> CPVect {
+        unsafe { cpDampedSpringGetanchorA(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn anchor_b(&self) -> CPVect {
+        unsafe { cpDampedSpringGetanchorB(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn rest_length(&self) -> CPFloat {
+        unsafe { cpDampedSpringGetRestLength(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn stiffness(&self) -> CPFloat {
+        unsafe { cpDampedSpringGetStiffness(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn damping(&self) -> CPFloat {
+        unsafe { cpDampedSpringGetDamping(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn set_anchor_a(&self, value: CPVect) {
+        unsafe { cpDampedSpringSetanchorA(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn set_anchor_b(&self, value: CPVect) {
+        unsafe { cpDampedSpringSetanchorB(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn set_rest_length(&self, value: CPFloat) {
+        unsafe { cpDampedSpringSetRestLength(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn set_stiffness(&self, value: CPFloat) {
+        unsafe { cpDampedSpringSetStiffness(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
+    pub fn set_damping(&self, value: CPFloat) {
+        unsafe { cpDampedSpringSetDamping(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for DampedSpring {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for DampedSpring {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Damped Rotary Spring.
+pub struct DampedRotarySpring {
+    ptr: *const CPDampedRotarySpring,
+}
+
+impl DampedRotarySpring {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, rest_angle: CPFloat, stiffness: CPFloat, damping: CPFloat) -> DampedRotarySpring {
+        unsafe {
+            DampedRotarySpring {
+                ptr: cpDampedRotarySpringNew(body_a.borrow().ptr, body_b.borrow().ptr, rest_angle, stiffness, damping) as *const CPDampedRotarySpring
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn rest_angle(&self) -> CPFloat {
+        unsafe { cpDampedRotarySpringGetRestAngle(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn stiffness(&self) -> CPFloat {
+        unsafe { cpDampedRotarySpringGetStiffness(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn damping(&self) -> CPFloat {
+        unsafe { cpDampedRotarySpringGetDamping(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn set_rest_angle(&self, value: CPFloat) {
+        unsafe { cpDampedRotarySpringSetRestAngle(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn set_stiffness(&self, value: CPFloat) {
+        unsafe { cpDampedRotarySpringSetStiffness(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
+    pub fn set_damping(&self, value: CPFloat) {
+        unsafe { cpDampedRotarySpringSetDamping(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for DampedRotarySpring {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for DampedRotarySpring {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Rotary Limit Joint.
+pub struct RotaryLimitJoint {
+    ptr: *const CPRotaryLimitJoint,
+}
+
+impl RotaryLimitJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRotaryLimitJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, min: CPFloat, max: CPFloat) -> RotaryLimitJoint {
+        unsafe {
+            RotaryLimitJoint {
+                ptr: cpRotaryLimitJointNew(body_a.borrow().ptr, body_b.borrow().ptr, min, max) as *const CPRotaryLimitJoint
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRotaryLimitJoint).
+    pub fn min(&self) -> CPFloat {
+        unsafe { cpRotaryLimitJointGetMin(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRotaryLimitJoint).
+    pub fn max(&self) -> CPFloat {
+        unsafe { cpRotaryLimitJointGetMax(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRotaryLimitJoint).
+    pub fn set_min(&self, value: CPFloat) {
+        unsafe { cpRotaryLimitJointSetMin(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRotaryLimitJoint).
+    pub fn set_max(&self, value: CPFloat) {
+        unsafe { cpRotaryLimitJointSetMax(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for RotaryLimitJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for RotaryLimitJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Ratchet Joint.
+pub struct RatchetJoint {
+    ptr: *const CPRatchetJoint,
+}
+
+impl RatchetJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, phase: CPFloat, ratchet: CPFloat) -> RatchetJoint {
+        unsafe {
+            RatchetJoint {
+                ptr: cpRatchetJointNew(body_a.borrow().ptr, body_b.borrow().ptr, phase, ratchet) as *const CPRatchetJoint
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn angle(&self) -> CPFloat {
+        unsafe { cpRatchetJointGetAngle(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn phase(&self) -> CPFloat {
+        unsafe { cpRatchetJointGetPhase(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn ratchet(&self) -> CPFloat {
+        unsafe { cpRatchetJointGetRatchet(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn set_angle(&self, value: CPFloat) {
+        unsafe { cpRatchetJointSetAngle(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn set_phase(&self, value: CPFloat) {
+        unsafe { cpRatchetJointSetPhase(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
+    pub fn set_ratchet(&self, value: CPFloat) {
+        unsafe { cpRatchetJointSetRatchet(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for RatchetJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for RatchetJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Gear Joint.
+pub struct GearJoint {
+    ptr: *const CPGearJoint,
+}
+
+impl GearJoint {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGearJoint).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, phase: CPFloat, ratio: CPFloat) -> GearJoint {
+        unsafe {
+            GearJoint {
+                ptr: cpGearJointNew(body_a.borrow().ptr, body_b.borrow().ptr, phase, ratio) as *const CPGearJoint
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGearJoint).
+    pub fn phase(&self) -> CPFloat {
+        unsafe { cpGearJointGetPhase(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGearJoint).
+    pub fn ratio(&self) -> CPFloat {
+        unsafe { cpGearJointGetRatio(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGearJoint).
+    pub fn set_phase(&self, value: CPFloat) {
+        unsafe { cpGearJointSetPhase(self.to_constraint(), value) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGearJoint).
+    pub fn set_ratio(&self, value: CPFloat) {
+        unsafe { cpGearJointSetRatio(self.to_constraint(), value) }
+    }
+}
+
+impl Constraint for GearJoint {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for GearJoint {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+/// A Simple Motor.
+pub struct SimpleMotor {
+    ptr: *const CPSimpleMotor,
+}
+
+impl SimpleMotor {
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSimpleMotor).
+    pub fn new(body_a: BodyHandle, body_b: BodyHandle, rate: CPFloat) -> SimpleMotor {
+        unsafe {
+            SimpleMotor {
+                ptr: cpSimpleMotorNew(body_a.borrow().ptr, body_b.borrow().ptr, rate) as *const CPSimpleMotor
+            }
+        }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSimpleMotor).
+    pub fn rate(&self) -> CPFloat {
+        unsafe { cpSimpleMotorGetRate(self.to_constraint()) }
+    }
+
+    /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSimpleMotor).
+    pub fn set_rate(&self, value: CPFloat) {
+        unsafe { cpSimpleMotorSetRate(self.to_constraint(), value) }
+    }
+
+}
+
+impl Constraint for SimpleMotor {
+    fn to_constraint(&self) -> *const CPConstraint {
+        self.ptr as *const CPConstraint
+    }
+}
+
+impl Drop for SimpleMotor {
+    fn drop(&mut self) {
+        unsafe {
+            cpConstraintFree(self.to_constraint());
+        }
+    }
+}
+
+
 // TODO is there a way to make ShapeBase private?
 /// A collision Shape base trait. See [Chipmunk Collision Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape).
 /// All shape structs implement this trait.
