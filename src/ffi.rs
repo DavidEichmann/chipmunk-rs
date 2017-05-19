@@ -19,6 +19,11 @@ impl CPVect {
     pub fn new(x: f64, y: f64) -> CPVect {
         CPVect { x: x, y: y }
     }
+
+    /// Create a zero CPVect.
+    pub fn zero() -> CPVect {
+        CPVect::new(0.0, 0.0)
+    }
 }
 
 /// A Chipmunk2D floating point value.

@@ -217,7 +217,7 @@ impl Space {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn remove_shape(&mut self, shape: ShapeHandle) -> Option<ShapeHandle> {
+    pub fn remove_shape(&mut self, shape: &ShapeHandle) -> Option<ShapeHandle> {
         // Remove the shape from the space in C.
         unsafe {
             cpSpaceRemoveShape(self.ptr, shape.borrow().to_shape());
@@ -228,7 +228,7 @@ impl Space {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn remove_body(&mut self, body: BodyHandle) -> Option<BodyHandle> {
+    pub fn remove_body(&mut self, body: &BodyHandle) -> Option<BodyHandle> {
         // Remove the body from the space in C.
         unsafe {
             cpSpaceRemoveBody(self.ptr, body.borrow().ptr);
@@ -239,12 +239,12 @@ impl Space {
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn contains_shape(&self, shape: ShapeHandle) -> bool {
+    pub fn contains_shape(&self, shape: &ShapeHandle) -> bool {
         unsafe { cpSpaceContainsShape(self.ptr, shape.borrow().to_shape()) }
     }
 
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
-    pub fn contains_body(&self, body: BodyHandle) -> bool {
+    pub fn contains_body(&self, body: &BodyHandle) -> bool {
         unsafe { cpSpaceContainsBody(self.ptr, body.borrow().ptr) }
     }
 
@@ -358,8 +358,75 @@ impl Space {
         handle
     }
 
-    // cpConstraint *cpSpaceAddConstraint(&self, constraint: cpConstraint)
-    // pub fn remove_constraint(&self, constraint: cpConstraint);
+    /// Remove a PinJoint constraint.
+    pub fn remove_pin_joint(&mut self, pin_joint: &PinJointHandle) {
+        let borrowed = pin_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.pin_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a SlideJoint constraint.
+    pub fn remove_slide_joint(&mut self, slide_joint: &SlideJointHandle) {
+        let borrowed = slide_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.slide_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a PivotJoint constraint.
+    pub fn remove_pivot_joint(&mut self, pivot_joint: &PivotJointHandle) {
+        let borrowed = pivot_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.pivot_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a GrooveJoint constraint.
+    pub fn remove_groove_joint(&mut self, groove_joint: &GrooveJointHandle) {
+        let borrowed = groove_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.groove_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a DampedSpring constraint.
+    pub fn remove_damped_spring(&mut self, damped_spring: &DampedSpringHandle) {
+        let borrowed = damped_spring.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.damped_springs.remove(&borrowed.ptr);
+    }
+
+    /// Remove a DampedRotarySpring constraint.
+    pub fn remove_damped_rotary_spring(&mut self, damped_rotary_spring: &DampedRotarySpringHandle) {
+        let borrowed = damped_rotary_spring.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.damped_rotary_springs.remove(&borrowed.ptr);
+    }
+
+    /// Remove a RotaryLimitJoint constraint.
+    pub fn remove_rotary_limit_joint(&mut self, rotary_limit_joint: &RotaryLimitJointHandle) {
+        let borrowed = rotary_limit_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.rotary_limit_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a RatchetJoint constraint.
+    pub fn remove_ratchet_joint(&mut self, ratchet_joint: &RatchetJointHandle) {
+        let borrowed = ratchet_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.ratchet_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a GearJoint constraint.
+    pub fn remove_gear_joint(&mut self, gear_joint: &GearJointHandle) {
+        let borrowed = gear_joint.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.gear_joints.remove(&borrowed.ptr);
+    }
+
+    /// Remove a SimpleMotor constraint.
+    pub fn remove_simple_motor(&mut self, simple_motor: &SimpleMotorHandle) {
+        let borrowed = simple_motor.borrow();
+        unsafe { cpSpaceRemoveConstraint(self.ptr, borrowed.to_constraint()); }
+        self.simple_motors.remove(&borrowed.ptr);
+    }
     
     /// See [Chipmunk Spaces](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpSpace).
     pub fn contains_constraint<C>(&self, constraint: C) -> bool
@@ -584,11 +651,10 @@ pub struct PinJoint {
 
 impl PinJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPinJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect) -> PinJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, anchor_a: CPVect, anchor_b: CPVect) -> PinJoint {
         unsafe {
             PinJoint {
                 ptr: cpPinJointNew(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b) as *const CPPinJoint
-
             }
         }
     }
@@ -648,7 +714,7 @@ pub struct SlideJoint {
 
 impl SlideJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSlideJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect, min: CPFloat, max: CPFloat) -> SlideJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, anchor_a: CPVect, anchor_b: CPVect, min: CPFloat, max: CPFloat) -> SlideJoint {
         unsafe {
             SlideJoint {
                 ptr: cpSlideJointNew(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b, min, max) as *const CPSlideJoint
@@ -721,7 +787,7 @@ pub struct PivotJoint {
 
 impl PivotJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpPivotJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect) -> PivotJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, anchor_a: CPVect, anchor_b: CPVect) -> PivotJoint {
         unsafe {
             PivotJoint {
                 ptr: cpPivotJointNew2(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b) as *const CPPivotJoint
@@ -774,7 +840,7 @@ pub struct GrooveJoint {
 
 impl GrooveJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGrooveJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, groove_a: CPVect, groove_b: CPVect, anchor_b: CPVect) -> GrooveJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, groove_a: CPVect, groove_b: CPVect, anchor_b: CPVect) -> GrooveJoint {
         unsafe {
             GrooveJoint {
                 ptr: cpGrooveJointNew(body_a.borrow().ptr, body_b.borrow().ptr, groove_a, groove_b, anchor_b) as *const CPGrooveJoint
@@ -837,7 +903,7 @@ pub struct DampedSpring {
 
 impl DampedSpring {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedSpring).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, anchor_a: CPVect, anchor_b: CPVect, rest_length: CPFloat, stiffness: CPFloat, damping: CPFloat) -> DampedSpring {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, anchor_a: CPVect, anchor_b: CPVect, rest_length: CPFloat, stiffness: CPFloat, damping: CPFloat) -> DampedSpring {
         unsafe {
             DampedSpring {
                 ptr: cpDampedSpringNew(body_a.borrow().ptr, body_b.borrow().ptr, anchor_a, anchor_b, rest_length, stiffness, damping) as *const CPDampedSpring
@@ -920,7 +986,7 @@ pub struct DampedRotarySpring {
 
 impl DampedRotarySpring {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpDampedRotarySpring).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, rest_angle: CPFloat, stiffness: CPFloat, damping: CPFloat) -> DampedRotarySpring {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, rest_angle: CPFloat, stiffness: CPFloat, damping: CPFloat) -> DampedRotarySpring {
         unsafe {
             DampedRotarySpring {
                 ptr: cpDampedRotarySpringNew(body_a.borrow().ptr, body_b.borrow().ptr, rest_angle, stiffness, damping) as *const CPDampedRotarySpring
@@ -983,7 +1049,7 @@ pub struct RotaryLimitJoint {
 
 impl RotaryLimitJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRotaryLimitJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, min: CPFloat, max: CPFloat) -> RotaryLimitJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, min: CPFloat, max: CPFloat) -> RotaryLimitJoint {
         unsafe {
             RotaryLimitJoint {
                 ptr: cpRotaryLimitJointNew(body_a.borrow().ptr, body_b.borrow().ptr, min, max) as *const CPRotaryLimitJoint
@@ -1036,7 +1102,7 @@ pub struct RatchetJoint {
 
 impl RatchetJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpRatchetJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, phase: CPFloat, ratchet: CPFloat) -> RatchetJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, phase: CPFloat, ratchet: CPFloat) -> RatchetJoint {
         unsafe {
             RatchetJoint {
                 ptr: cpRatchetJointNew(body_a.borrow().ptr, body_b.borrow().ptr, phase, ratchet) as *const CPRatchetJoint
@@ -1099,7 +1165,7 @@ pub struct GearJoint {
 
 impl GearJoint {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpGearJoint).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, phase: CPFloat, ratio: CPFloat) -> GearJoint {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, phase: CPFloat, ratio: CPFloat) -> GearJoint {
         unsafe {
             GearJoint {
                 ptr: cpGearJointNew(body_a.borrow().ptr, body_b.borrow().ptr, phase, ratio) as *const CPGearJoint
@@ -1152,7 +1218,7 @@ pub struct SimpleMotor {
 
 impl SimpleMotor {
     /// See [Chipmunk Pin Joint](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#ConstraintTypes-cpSimpleMotor).
-    pub fn new(body_a: BodyHandle, body_b: BodyHandle, rate: CPFloat) -> SimpleMotor {
+    pub fn new(body_a: &BodyHandle, body_b: &BodyHandle, rate: CPFloat) -> SimpleMotor {
         unsafe {
             SimpleMotor {
                 ptr: cpSimpleMotorNew(body_a.borrow().ptr, body_b.borrow().ptr, rate) as *const CPSimpleMotor
@@ -1247,7 +1313,7 @@ pub struct CircleShape {
 
 impl CircleShape {
     /// Create a new circle shape. See [Working With Circle Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Circles)
-    pub fn new(body: BodyHandle, radius: f64, offset: CPVect) -> CircleShape {
+    pub fn new(body: &BodyHandle, radius: f64, offset: CPVect) -> CircleShape {
         unsafe {
             CircleShape {
                 ptr: cpCircleShapeNew(body.borrow().ptr, radius, offset),
@@ -1296,7 +1362,7 @@ pub struct PolyShape {
 impl PolyShape {
     /// Create a new poly shape. radius is the radius of the corners. Use `radius: 0.0` for no rounded corners.
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
-    pub fn new_convex_raw(body: BodyHandle, points: &[CPVect], radius: f64) -> PolyShape {
+    pub fn new_convex_raw(body: &BodyHandle, points: &[CPVect], radius: f64) -> PolyShape {
         unsafe {
             PolyShape {
                 ptr: cpPolyShapeNewRaw(body.borrow().ptr,
@@ -1310,7 +1376,7 @@ impl PolyShape {
 
     /// Create a new box shape. radius is the radius of the corners. Use `radius: 0.0` for no rounded corners.
     /// See [Working With Polygon Shapes](http://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.1-Docs/#cpShape-Polys).
-    pub fn new_box(body: BodyHandle, width: f64, height: f64, radius: f64) -> PolyShape {
+    pub fn new_box(body: &BodyHandle, width: f64, height: f64, radius: f64) -> PolyShape {
         unsafe {
             PolyShape {
                 ptr: cpBoxShapeNew(body.borrow().ptr, width, height, radius),
@@ -1371,7 +1437,7 @@ mod tests {
         let points = [CPVect::new(1.0, 1.0), CPVect::new(2.0, 1.0), CPVect::new(1.5, 2.0)];
         let poly = {
             let points_clone = points.clone();
-            PolyShape::new_convex_raw(body, &points_clone, 0.1)
+            PolyShape::new_convex_raw(&body, &points_clone, 0.1)
         };
 
         assert_eq!(0.1, poly.radius());
@@ -1392,7 +1458,7 @@ mod tests {
 
         // Create a dynamic body and add it to the space.
         let body_handle = space.add_body(Body::new_dynamic(1.0, 1.0));
-        space.add_shape(Box::new(CircleShape::new(body_handle.clone(), 1.0, CPVect::new(0.0, 0.0))));
+        space.add_shape(Box::new(CircleShape::new(&body_handle, 1.0, CPVect::new(0.0, 0.0))));
         body_handle.borrow_mut().set_position(CPVect::new(-1.0, -2.0));
 
         // Let the ball fall and check that the velocity/position change.
